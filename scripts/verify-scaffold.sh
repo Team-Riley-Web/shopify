@@ -9,7 +9,7 @@ SPEC="${1:?usage: verify-scaffold.sh <tag|tarball>}"
 STARTER="${STARTER:-$HOME/Sites/starter}"
 case "$SPEC" in
   *.tgz) SPEC="$(cd "$(dirname "$SPEC")" && pwd)/$(basename "$SPEC")" ;;
-  v*)    SPEC="github:Team-Riley-Web/shopify#$SPEC" ;;
+  v*)    SPEC="git+https://github.com/Team-Riley-Web/shopify.git#$SPEC" ;;
 esac
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/scaffold-XXXXXX")"
 trap '[ "${KEEP:-0}" = 1 ] && echo "kept $WORK" || rm -rf "$WORK"' EXIT
@@ -24,9 +24,10 @@ echo "== install dev deps"
 npm i --no-audit --no-fund > npm-install-2.log 2>&1
 npx playwright install chromium > playwright-install.log 2>&1
 echo "== astro check"
-npx astro check 2>&1 | tail -3 || true
+npx astro check 2>&1 | tail -3
 echo "== build + e2e (mock catalog)"
 npm run test:e2e 2>&1 | tail -12
 echo "== leak checks"
-test "$(grep -l 'GetProducts' dist/_astro/*.js 2>/dev/null | wc -l | tr -d ' ')" = 0 && echo "ok: no catalog queries in the browser bundle"
+if grep -ql 'GetProducts' dist/_astro/*.js 2>/dev/null; then echo "LEAK: catalog queries in the browser bundle"; exit 1; fi
+echo "ok: no catalog queries in the browser bundle"
 echo "SCAFFOLD OK"

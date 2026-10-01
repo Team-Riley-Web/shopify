@@ -1,4 +1,6 @@
-import { createStorefrontFetch, type StorefrontConfig } from './fetch.js';
+import { cleanDomain, createStorefrontFetch, type StorefrontConfig } from './fetch.js';
+
+export { cleanDomain };
 
 export interface CartClientConfig extends StorefrontConfig {
   /** Where checkout happens. Default: `domain`. Protocol and path are stripped. */
@@ -67,14 +69,6 @@ export interface CartClient {
   parseCart(raw: any): Cart;
 }
 
-/** `https://Shop.Example.com/x` → `shop.example.com`. */
-export function cleanDomain(value: string | undefined): string {
-  return (value ?? '')
-    .replace(/^https?:\/\//, '')
-    .replace(/\/.*$/, '')
-    .toLowerCase();
-}
-
 const CART_FRAGMENT = `
   id
   checkoutUrl
@@ -113,7 +107,7 @@ const CART_LINES_ADD = `mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInp
 export function createCartClient(config: CartClientConfig): CartClient {
   // Browser calls fail fast: a shopper clicking "add to cart" should see an
   // error now, not after seconds of silent backoff.
-  const gql = createStorefrontFetch({ retry: { attempts: 1 }, ...config });
+  const gql = createStorefrontFetch({ ...config, retry: config.retry ?? { attempts: 1 } });
 
   const storeDomain = cleanDomain(config.domain);
   const configuredCheckout = cleanDomain(config.checkoutDomain) || storeDomain;

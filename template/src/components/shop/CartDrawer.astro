@@ -27,14 +27,16 @@ import { Minus, Plus, X } from '@lucide/astro';
   @keydown.escape.window="$store.cart.close()"
   class="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-xl"
   role="dialog"
+  aria-modal="true"
   aria-label="Shopping cart"
+  x-effect="if ($store.cart.isOpen) $nextTick(() => $el.querySelector('[data-close]')?.focus())"
 >
   <header class="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
     <h2 class="text-base font-semibold text-neutral-900">
       Your cart
       <span x-show="$store.cart.totalQuantity > 0" x-text="`(${$store.cart.totalQuantity})`" class="font-normal text-neutral-500"></span>
     </h2>
-    <button type="button" @click="$store.cart.close()" class="rounded-md p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Close cart">
+    <button type="button" data-close @click="$store.cart.close()" class="rounded-md p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Close cart">
       <X class="h-5 w-5" />
     </button>
   </header>
@@ -49,7 +51,7 @@ import { Minus, Plus, X } from '@lucide/astro';
   <ul x-show="$store.cart.items.length > 0" class="flex-1 divide-y divide-neutral-100 overflow-y-auto px-6">
     <template x-for="item in $store.cart.items" :key="item.id">
       <li class="flex gap-4 py-4">
-        <img :src="item.imageUrl" :alt="item.productTitle" class="h-20 w-20 shrink-0 rounded-md bg-neutral-100 object-cover" />
+        <img :src="item.imageUrl || undefined" :alt="item.productTitle" class="h-20 w-20 shrink-0 rounded-md bg-neutral-100 object-cover" />
         <div class="min-w-0 flex-1">
           <a :href="`/products/${item.productHandle}`" class="line-clamp-2 text-sm font-medium text-neutral-900" x-text="item.productTitle"></a>
           <p x-show="item.variantTitle && item.variantTitle !== 'Default Title'" x-text="item.variantTitle" class="text-xs text-neutral-500"></p>
@@ -78,3 +80,8 @@ import { Minus, Plus, X } from '@lucide/astro';
     <button type="button" @click="$store.cart.close()" class="block w-full text-center text-sm text-neutral-600 hover:text-neutral-900">Continue Shopping</button>
   </footer>
 </aside>
+
+<style is:global>
+  /* Alpine-driven overlays stay hidden until Alpine has initialised. */
+  [x-cloak] { display: none !important; }
+</style>

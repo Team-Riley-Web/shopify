@@ -1,7 +1,14 @@
 export const DEFAULT_API_VERSION = '2026-01';
 export const PLACEHOLDER_DOMAIN = 'your-store.myshopify.com';
+/** `https://Shop.Example.com/x` → `shop.example.com`. */
+export function cleanDomain(value) {
+    return (value ?? '')
+        .replace(/^https?:\/\//, '')
+        .replace(/\/.*$/, '')
+        .toLowerCase();
+}
 export function storefrontUrl(domain, apiVersion = DEFAULT_API_VERSION) {
-    return `https://${domain}/api/${apiVersion}/graphql.json`;
+    return `https://${cleanDomain(domain)}/api/${apiVersion}/graphql.json`;
 }
 // A production build makes one Storefront call per product (hundreds), so a
 // single transient hiccup used to fail or silently thin out a whole deploy.
@@ -10,13 +17,14 @@ export function storefrontUrl(domain, apiVersion = DEFAULT_API_VERSION) {
 const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 export function createStorefrontFetch(config) {
-    const url = storefrontUrl(config.domain, config.apiVersion);
+    const domain = cleanDomain(config.domain);
+    const url = storefrontUrl(domain, config.apiVersion);
     const attempts = Math.max(1, config.retry?.attempts ?? 3);
     const baseDelayMs = config.retry?.baseDelayMs ?? 500;
     const sleep = config.sleep ?? defaultSleep;
     return async function storefrontFetch(query, variables = {}) {
         if (!config.useMocks) {
-            if (!config.domain || config.domain === PLACEHOLDER_DOMAIN)
+            if (!domain || domain === PLACEHOLDER_DOMAIN)
                 throw new Error('Missing Shopify store domain');
             if (!config.token)
                 throw new Error('Missing Shopify Storefront API token');
@@ -52,7 +60,14 @@ export function createStorefrontFetch(config) {
                 await sleep(baseDelayMs * 2 ** (attempt - 1));
                 continue;
             }
-            const json = await res.json();
+            let json;
+            try {
+                json = await res.json();
+            }
+            catch {
+                // A 200 with a non-JSON body is an edge/HTML error page, not data.
+                throw new Error('Shopify API error: invalid JSON response');
+            }
             if (json.errors)
                 throw new Error(json.errors[0]?.message ?? 'Shopify GraphQL error');
             return json.data;

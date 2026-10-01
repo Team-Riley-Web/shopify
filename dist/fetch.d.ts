@@ -17,5 +17,7 @@ export interface StorefrontConfig {
     sleep?: (ms: number) => Promise<void>;
 }
 export type StorefrontFetch = <T>(query: string, variables?: Record<string, unknown>) => Promise<T>;
+/** `https://Shop.Example.com/x` → `shop.example.com`. */
+export declare function cleanDomain(value: string | undefined): string;
 export declare function storefrontUrl(domain: string, apiVersion?: string): string;
 export declare function createStorefrontFetch(config: StorefrontConfig): StorefrontFetch;

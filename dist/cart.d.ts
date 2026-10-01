@@ -1,4 +1,5 @@
-import { type StorefrontConfig } from './fetch.js';
+import { cleanDomain, type StorefrontConfig } from './fetch.js';
+export { cleanDomain };
 export interface CartClientConfig extends StorefrontConfig {
     /** Where checkout happens. Default: `domain`. Protocol and path are stripped. */
     checkoutDomain?: string;
@@ -67,6 +68,4 @@ export interface CartClient {
     normalizeCheckoutUrl(checkoutUrl: string): string;
     parseCart(raw: any): Cart;
 }
-/** `https://Shop.Example.com/x` → `shop.example.com`. */
-export declare function cleanDomain(value: string | undefined): string;
 export declare function createCartClient(config: CartClientConfig): CartClient;

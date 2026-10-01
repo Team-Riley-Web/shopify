@@ -129,6 +129,16 @@ describe('cart store behaviour', () => {
     expect(localStorage.getItem(CART_STORAGE_KEY)).toBe('gid://shopify/Cart/cart-1');
   });
 
+  it('creates a fresh cart when the saved one has expired (getCart returns null)', async () => {
+    localStorage.setItem(CART_STORAGE_KEY, 'expired');
+    const api = mockApi();
+    api.getCart.mockResolvedValueOnce(null as never);
+    const store = createCartStore(api);
+    await store.init();
+    expect(api.createCart).toHaveBeenCalled();
+    expect(store.id).toBe('gid://shopify/Cart/cart-1');
+  });
+
   it('reports when the cart cannot be created at all', async () => {
     const api = mockApi();
     api.createCart.mockRejectedValueOnce(new Error('down'));

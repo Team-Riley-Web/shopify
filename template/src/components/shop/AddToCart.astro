@@ -15,7 +15,7 @@ const idExpr = variantExpression ?? JSON.stringify(variantId);
   type="button"
   x-data="{ adding: false, added: false }"
   @click={`if (adding || added) return; adding = true; await $store.cart.addItem(${idExpr}); adding = false; added = true; setTimeout(() => { added = false; }, 1600);`}
-  :disabled="adding || $store.cart.isLoading"
+  :disabled={`adding || $store.cart.isLoading || ${!available}`}
   disabled={!available || undefined}
   class={`inline-flex items-center justify-center rounded-md border border-neutral-900 bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-300 disabled:bg-neutral-300 ${className}`}
 >

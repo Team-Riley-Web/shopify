@@ -1,6 +1,6 @@
 {
   "name": "@team-riley/shopify",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Headless Shopify engine for Team Riley Astro storefronts: Storefront API client, catalog, cart, discount links, subscriptions.",
   "license": "MIT",
   "type": "module",
@@ -32,13 +32,11 @@
     "alpinejs": "^3.17.4",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "@types/node": "^22.20.4"
   },
   "engines": {
     "node": ">=20"
-  },
-  "dependencies": {
-    "@types/node": "^22.20.4"
   },
   "repository": {
     "type": "git",

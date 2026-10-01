@@ -1,11 +1,5 @@
-import { createStorefrontFetch } from './fetch.js';
-/** `https://Shop.Example.com/x` → `shop.example.com`. */
-export function cleanDomain(value) {
-    return (value ?? '')
-        .replace(/^https?:\/\//, '')
-        .replace(/\/.*$/, '')
-        .toLowerCase();
-}
+import { cleanDomain, createStorefrontFetch } from './fetch.js';
+export { cleanDomain };
 const CART_FRAGMENT = `
   id
   checkoutUrl
@@ -42,7 +36,7 @@ const CART_LINES_ADD = `mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInp
 export function createCartClient(config) {
     // Browser calls fail fast: a shopper clicking "add to cart" should see an
     // error now, not after seconds of silent backoff.
-    const gql = createStorefrontFetch({ retry: { attempts: 1 }, ...config });
+    const gql = createStorefrontFetch({ ...config, retry: config.retry ?? { attempts: 1 } });
     const storeDomain = cleanDomain(config.domain);
     const configuredCheckout = cleanDomain(config.checkoutDomain) || storeDomain;
     const headless = new Set((config.headlessDomains ?? []).map(cleanDomain).filter(Boolean));

@@ -68,6 +68,15 @@ describe('cart mutations', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
+  it('honours an explicit retry config but never re-enables retries by accident', async () => {
+    const explicit = clientWith(() => new Response('x', { status: 503 }), { retry: { attempts: 2 } });
+    await expect(explicit.client.createCart()).rejects.toThrow();
+    expect(explicit.fetchImpl).toHaveBeenCalledTimes(2);
+    const undefinedRetry = clientWith(() => new Response('x', { status: 503 }), { retry: undefined });
+    await expect(undefinedRetry.client.createCart()).rejects.toThrow();
+    expect(undefinedRetry.fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
   it('returns null for an unknown cart', async () => {
     const { client } = clientWith(() => ({ cart: null }));
     expect(await client.getCart('gone')).toBeNull();

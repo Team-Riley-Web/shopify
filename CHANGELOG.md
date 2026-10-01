@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.1 — 2026-10-01
+
+Fixes from the post-migration review:
+
+- Template: a sold-out Add to Cart / Buy Now button no longer becomes
+  clickable once Alpine binds `:disabled`; `[x-cloak]` is now styled so the
+  cart drawer and search modal do not flash before Alpine initialises;
+  dialogs get `aria-modal` and the drawer focuses its close button on open;
+  empty image URLs no longer render `src=""`; dropped the `prose` classes
+  the starter does not ship.
+- Store domain is normalised (`https://`, paths, case) for the Storefront URL
+  as well as for checkout.
+- Pagination stops instead of looping if Shopify reports a next page with no
+  cursor; a 200 with a non-JSON body throws a labelled error.
+- `@types/node` moved to devDependencies (the package has no runtime deps).
+- `verify-scaffold.sh` leak and `astro check` failures are fatal.
+- Docs recommend the `git+https://` dependency form.
+
 ## 1.1.0 — 2026-10-01
 
 New-store path for the Team Riley `starter`:

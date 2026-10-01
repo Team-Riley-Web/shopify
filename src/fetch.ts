@@ -17,8 +17,16 @@ export interface StorefrontConfig {
 
 export type StorefrontFetch = <T>(query: string, variables?: Record<string, unknown>) => Promise<T>;
 
+/** `https://Shop.Example.com/x` → `shop.example.com`. */
+export function cleanDomain(value: string | undefined): string {
+  return (value ?? '')
+    .replace(/^https?:\/\//, '')
+    .replace(/\/.*$/, '')
+    .toLowerCase();
+}
+
 export function storefrontUrl(domain: string, apiVersion = DEFAULT_API_VERSION): string {
-  return `https://${domain}/api/${apiVersion}/graphql.json`;
+  return `https://${cleanDomain(domain)}/api/${apiVersion}/graphql.json`;
 }
 
 // A production build makes one Storefront call per product (hundreds), so a
@@ -30,14 +38,15 @@ const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
 const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export function createStorefrontFetch(config: StorefrontConfig): StorefrontFetch {
-  const url = storefrontUrl(config.domain, config.apiVersion);
+  const domain = cleanDomain(config.domain);
+  const url = storefrontUrl(domain, config.apiVersion);
   const attempts = Math.max(1, config.retry?.attempts ?? 3);
   const baseDelayMs = config.retry?.baseDelayMs ?? 500;
   const sleep = config.sleep ?? defaultSleep;
 
   return async function storefrontFetch<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
     if (!config.useMocks) {
-      if (!config.domain || config.domain === PLACEHOLDER_DOMAIN) throw new Error('Missing Shopify store domain');
+      if (!domain || domain === PLACEHOLDER_DOMAIN) throw new Error('Missing Shopify store domain');
       if (!config.token) throw new Error('Missing Shopify Storefront API token');
     }
 
@@ -73,7 +82,13 @@ export function createStorefrontFetch(config: StorefrontConfig): StorefrontFetch
         continue;
       }
 
-      const json = await res.json();
+      let json: any;
+      try {
+        json = await res.json();
+      } catch {
+        // A 200 with a non-JSON body is an edge/HTML error page, not data.
+        throw new Error('Shopify API error: invalid JSON response');
+      }
       if (json.errors) throw new Error(json.errors[0]?.message ?? 'Shopify GraphQL error');
       return json.data as T;
     }

@@ -65,6 +65,12 @@ describe('getAllProducts', () => {
     expect(calls[0]?.variables.first).toBe(100);
   });
 
+  it('stops instead of looping when a page claims to continue without a cursor', async () => {
+    const { catalog, calls } = catalogWith(() => page([product({ id: 'a' })], true, null));
+    expect((await catalog.getAllProducts()).map((p) => p.id)).toEqual(['a']);
+    expect(calls).toHaveLength(1);
+  });
+
   it('returns what it has when a later page fails (non-throw policy)', async () => {
     const { catalog } = catalogWith((call) => (
       call.variables.after === null ? page([product({ id: 'a' })], true, 'c1') : new Response('x', { status: 400 })

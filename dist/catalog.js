@@ -62,6 +62,9 @@ export function createCatalog(config) {
                 products.push(...data.products.edges.map((e) => e.node));
                 hasNextPage = data.products.pageInfo?.hasNextPage ?? false;
                 after = data.products.pageInfo?.endCursor ?? null;
+                // A page that claims to continue but gives no cursor would refetch page 1 forever.
+                if (hasNextPage && !after)
+                    break;
             }
             catch (error) {
                 handleError('Shopify all-products fetch failed', error);

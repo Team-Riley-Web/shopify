@@ -21,6 +21,7 @@ import { Search, X } from '@lucide/astro';
   @keydown.escape.window="$store.search.close()"
   class="fixed inset-x-4 top-20 z-50 mx-auto max-w-xl overflow-hidden rounded-lg bg-white shadow-xl"
   role="dialog"
+  aria-modal="true"
   aria-label="Search products"
 >
   <form class="flex items-center gap-3 border-b border-neutral-200 px-4" @submit.prevent="$store.search.doSearch()">
@@ -42,7 +43,7 @@ import { Search, X } from '@lucide/astro';
     <template x-for="product in $store.search.results" :key="product.id">
       <li>
         <a :href="`/products/${product.handle}`" class="flex items-center gap-4 px-4 py-3 hover:bg-neutral-50">
-          <img :src="product.imageUrl" :alt="product.imageAlt || product.title" class="h-12 w-12 rounded-md bg-neutral-100 object-cover" />
+          <img :src="product.imageUrl || undefined" :alt="product.imageAlt || product.title" class="h-12 w-12 rounded-md bg-neutral-100 object-cover" />
           <span class="flex-1 text-sm text-neutral-900" x-text="product.title"></span>
           <span class="text-sm text-neutral-500" x-text="$store.search.formatPrice(product.price)"></span>
         </a>
@@ -51,3 +52,7 @@ import { Search, X } from '@lucide/astro';
   </ul>
   <p x-show="$store.search.query.trim() && !$store.search.isLoading && $store.search.results.length === 0" class="px-4 py-6 text-center text-sm text-neutral-500">No products found.</p>
 </div>
+
+<style is:global>
+  [x-cloak] { display: none !important; }
+</style>

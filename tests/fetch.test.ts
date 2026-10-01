@@ -118,3 +118,19 @@ describe('createStorefrontFetch', () => {
     spy.mockRestore();
   });
 });
+
+describe('domain normalisation and odd responses', () => {
+  it('normalises the store domain for the Storefront URL and the guards', async () => {
+    const { fetch, fetchImpl } = setup([ok({})], { domain: 'https://Shop.MyShopify.com/admin' });
+    await fetch('{}');
+    expect((fetchImpl.mock.calls[0] as unknown as [string])[0]).toBe('https://shop.myshopify.com/api/2026-01/graphql.json');
+    const placeholder = setup([ok({})], { domain: 'https://your-store.myshopify.com/' });
+    await expect(placeholder.fetch('{}')).rejects.toThrow('Missing Shopify store domain');
+  });
+
+  it('labels a 200 with a non-JSON body instead of surfacing a bare SyntaxError', async () => {
+    const { fetch, fetchImpl } = setup([new Response('<html>edge error</html>', { status: 200 })]);
+    await expect(fetch('{}')).rejects.toThrow('Shopify API error: invalid JSON response');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+});
