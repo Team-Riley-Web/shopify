@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CartDrawer from '../components/shop/CartDrawer.astro';
+import SearchModal from '../components/shop/SearchModal.astro';
+import ProductCard from '../components/shop/ProductCard.astro';
+import { getAllProducts } from '../lib/shopify';
+
+const products = await getAllProducts();
+---
+
+<BaseLayout title="Shop" description="Browse all products.">
+  <Header />
+  <main class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <h1 class="text-3xl font-semibold tracking-tight text-neutral-900">Shop</h1>
+    <p class="mt-2 text-neutral-500">{products.length} products</p>
+    <ul class="mt-10 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+      {products.map((product) => (
+        <li><ProductCard product={product} /></li>
+      ))}
+    </ul>
+  </main>
+  <Footer />
+  <CartDrawer />
+  <SearchModal />
+</BaseLayout>

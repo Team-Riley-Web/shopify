@@ -1,0 +1,53 @@
+---
+import { Search, X } from '@lucide/astro';
+/* Mount once per page. Opens with $store.search.open(); see ShopControls. */
+---
+
+<div
+  x-data
+  x-cloak
+  x-show="$store.search.isOpen"
+  x-transition.opacity
+  @click="$store.search.close()"
+  class="fixed inset-0 z-40 bg-neutral-900/40"
+  aria-hidden="true"
+></div>
+
+<div
+  x-data
+  x-cloak
+  x-show="$store.search.isOpen"
+  x-transition
+  @keydown.escape.window="$store.search.close()"
+  class="fixed inset-x-4 top-20 z-50 mx-auto max-w-xl overflow-hidden rounded-lg bg-white shadow-xl"
+  role="dialog"
+  aria-label="Search products"
+>
+  <form class="flex items-center gap-3 border-b border-neutral-200 px-4" @submit.prevent="$store.search.doSearch()">
+    <Search class="h-5 w-5 shrink-0 text-neutral-400" />
+    <input
+      type="search"
+      x-model="$store.search.query"
+      @input.debounce.250ms="$store.search.doSearch()"
+      x-effect="if ($store.search.isOpen) $nextTick(() => $el.focus())"
+      placeholder="Search products"
+      aria-label="Search products"
+      class="h-14 w-full bg-transparent text-base outline-none placeholder:text-neutral-400"
+    />
+    <button type="button" @click="$store.search.close()" class="rounded-md p-2 text-neutral-500 hover:text-neutral-900" aria-label="Close search">
+      <X class="h-5 w-5" />
+    </button>
+  </form>
+  <ul class="max-h-96 divide-y divide-neutral-100 overflow-y-auto">
+    <template x-for="product in $store.search.results" :key="product.id">
+      <li>
+        <a :href="`/products/${product.handle}`" class="flex items-center gap-4 px-4 py-3 hover:bg-neutral-50">
+          <img :src="product.imageUrl" :alt="product.imageAlt || product.title" class="h-12 w-12 rounded-md bg-neutral-100 object-cover" />
+          <span class="flex-1 text-sm text-neutral-900" x-text="product.title"></span>
+          <span class="text-sm text-neutral-500" x-text="$store.search.formatPrice(product.price)"></span>
+        </a>
+      </li>
+    </template>
+  </ul>
+  <p x-show="$store.search.query.trim() && !$store.search.isLoading && $store.search.results.length === 0" class="px-4 py-6 text-center text-sm text-neutral-500">No products found.</p>
+</div>

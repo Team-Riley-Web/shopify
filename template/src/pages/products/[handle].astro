@@ -1,0 +1,105 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import CartDrawer from '../../components/shop/CartDrawer.astro';
+import SearchModal from '../../components/shop/SearchModal.astro';
+import ProductCard from '../../components/shop/ProductCard.astro';
+import AddToCart from '../../components/shop/AddToCart.astro';
+import { formatPrice, getAllProducts, getFeaturedProducts, getProductByHandle } from '../../lib/shopify';
+
+export async function getStaticPaths() {
+  const products = await getAllProducts();
+  return products.map((product) => ({ params: { handle: product.handle } }));
+}
+
+const { handle } = Astro.params;
+const product = await getProductByHandle(handle!);
+if (!product) return Astro.redirect('/shop');
+
+const images = product.images.edges.map((edge) => edge.node);
+const variants = product.variants.edges.map((edge) => edge.node);
+const hasVariantChoice = variants.length > 1 || (variants[0] && variants[0].title !== 'Default Title');
+const firstAvailable = variants.find((variant) => variant.availableForSale) ?? variants[0];
+const currency = product.priceRange.minVariantPrice.currencyCode;
+const minPrice = formatPrice(product.priceRange.minVariantPrice.amount, currency);
+const maxPrice = formatPrice(product.priceRange.maxVariantPrice.amount, currency);
+const priceDisplay = minPrice === maxPrice ? minPrice : `${minPrice} – ${maxPrice}`;
+const related = (product.relatedProducts?.length ? product.relatedProducts : await getFeaturedProducts())
+  .filter((candidate) => candidate.handle !== product.handle)
+  .slice(0, 4);
+const description = product.description.slice(0, 155);
+---
+
+<BaseLayout title={product.title} description={description} image={images[0]?.url} imageAlt={images[0]?.altText ?? product.title} type="product">
+  <Header />
+  <main class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <div class="grid gap-10 lg:grid-cols-2" x-data={`{ variantId: ${JSON.stringify(firstAvailable?.id ?? '')}, image: 0 }`}>
+      <section>
+        <div class="aspect-square overflow-hidden rounded-lg bg-neutral-100">
+          {images.map((image, index) => (
+            <img src={image.url} alt={image.altText ?? product.title} x-show={`image === ${index}`} x-cloak={index > 0 || undefined} class="h-full w-full object-cover" loading={index === 0 ? 'eager' : 'lazy'} />
+          ))}
+        </div>
+        {images.length > 1 && (
+          <ul class="mt-3 grid grid-cols-5 gap-3">
+            {images.map((image, index) => (
+              <li>
+                <button type="button" @click={`image = ${index}`} :class={`image === ${index} ? 'ring-2 ring-neutral-900' : ''`} class="aspect-square w-full overflow-hidden rounded-md bg-neutral-100" aria-label={`Show image ${index + 1}`}>
+                  <img src={image.url} alt="" class="h-full w-full object-cover" loading="lazy" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section class="flex flex-col gap-6">
+        <div>
+          <h1 class="text-3xl font-semibold tracking-tight text-neutral-900">{product.title}</h1>
+          <p class="mt-2 text-lg text-neutral-700">{priceDisplay}</p>
+        </div>
+
+        {hasVariantChoice && (
+          <label class="block text-sm">
+            <span class="mb-1 block font-medium text-neutral-900">Option</span>
+            <select x-model="variantId" class="w-full rounded-md border border-neutral-300 px-3 py-2">
+              {variants.map((variant) => (
+                <option value={variant.id} disabled={!variant.availableForSale}>
+                  {variant.title}{variant.availableForSale ? '' : ' (sold out)'} · {formatPrice(variant.price.amount, currency)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <AddToCart variantExpression="variantId" available={product.availableForSale} class="flex-1" />
+          <button
+            type="button"
+            @click="await $store.cart.addItem(variantId); if ($store.cart.checkoutUrl && !$store.cart.errorMessage) window.location.assign($store.cart.checkoutUrl)"
+            :disabled="$store.cart.isLoading"
+            disabled={!product.availableForSale || undefined}
+            class="flex-1 rounded-md border border-neutral-900 px-5 py-3 text-sm font-medium text-neutral-900 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:border-neutral-300 disabled:text-neutral-400"
+          >
+            Buy Now
+          </button>
+        </div>
+
+        <div class="prose prose-neutral max-w-none text-neutral-700" set:html={product.descriptionHtml} />
+      </section>
+    </div>
+
+    {related.length > 0 && (
+      <section class="mt-20">
+        <h2 class="text-xl font-semibold text-neutral-900">You may also like</h2>
+        <ul class="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
+          {related.map((item) => <li><ProductCard product={item} /></li>)}
+        </ul>
+      </section>
+    )}
+  </main>
+  <Footer />
+  <CartDrawer />
+  <SearchModal />
+</BaseLayout>

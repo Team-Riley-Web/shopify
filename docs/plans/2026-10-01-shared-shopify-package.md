@@ -10,6 +10,25 @@
 
 **Spec:** This document (the design discussion in the session is summarised in "Background" below).
 
+## Status (2026-10-01, end of day)
+
+| Task | State | Evidence |
+|---|---|---|
+| 1–9 package v1.0.0 | done | 140 tests, `npm run check` green, CI green on `main` and `v1.0.0`; public repo `Team-Riley-Web/shopify` |
+| 10 Rosario baseline | done | e2e 4/7 → 7/7 on `master` (version-agnostic mocks), separate commit |
+| 11 Rosario migration | PR open | [rosario#3](https://github.com/Team-Riley-Web/rosario/pull/3): unit 48/48, e2e 7/7, real-catalog build identical except `discount/index.html` |
+| 12 CFC baseline + migration | PR open | [cfc#3](https://github.com/TheRileyBird/cfc/pull/3): unit 88/88, e2e 17/17 (was 15/17), real-catalog build identical (0 changed), leak check clean |
+| 13 template + init | done | `template/` (17 files), `lib/init.mjs` + `bin`, 4 init tests |
+| 14 scaffold verification + v1.1.0 + starter README | see git log | `scripts/verify-scaffold.sh`, starter branch `shopify-docs` |
+| 15 final review | pending | |
+
+Discoveries during execution (beyond the plan review):
+- Parallel shell calls share one working directory: an `npm install -D alpinejs` meant for the package landed in `cfc` and was reverted with `git checkout` + `npm ci`. Everything after that used subshells and absolute paths.
+- Bundled module scripts run after the Alpine `page.js` module, so the discount page now boots the cart store before redirecting. The e2e `getCart` mock returned a 1-item cart for a cart nobody had added to, which made the (intended) clear-once-applied logic remove the code; both specs now restore the cart as created. A `<noscript>` refresh fallback was added to the discount page.
+- Both live sites' e2e cart tests had been failing on `master` since the API version bump; two further CFC test bugs were masked behind that.
+- Netlify install proven with `GIT_SSH_COMMAND=false npm ci` (npm fetches the pinned commit's tarball over HTTPS).
+- Netlify CLI is not linked for either site, so deploy-preview env scoping was not checked; the real-catalog local build comparison replaced that check.
+
 ## Background (what we found, 2026-10-01)
 
 - Three copies of the engine: `starter-shopify`, `rosario`, `cfc`. They have diverged: 294 / 349 changed lines in `shopify.ts` alone.

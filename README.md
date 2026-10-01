@@ -17,7 +17,25 @@ npm i github:Team-Riley-Web/shopify#v1.0.0
 
 Pin to a tag. Netlify installs it with plain `npm ci`, no auth needed.
 
-## Use
+## New store from the starter
+
+```sh
+# in a fresh copy of Team-Riley-Web/starter
+npm i github:Team-Riley-Web/shopify#v1.1.0
+npx team-riley-shopify
+npm install && npx playwright install chromium && npm run test:e2e
+```
+
+`team-riley-shopify` copies `template/` into the project (never overwriting a
+file you already have), registers the cart and search stores in
+`src/alpine.ts`, and adds the e2e script. It prints the two things left to do
+by hand: mount `<CartDrawer />` and `<SearchModal />` in the layout, and put
+`<ShopControls />` in the header. The components are deliberately neutral
+(Tailwind utilities, grayscale) so each store restyles them.
+`scripts/verify-scaffold.sh <tag|tarball>` runs the whole path against a copy
+of the starter.
+
+## Use (by hand)
 
 ```ts
 // src/lib/shopify.ts (build-time: catalog)

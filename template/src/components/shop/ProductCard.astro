@@ -1,0 +1,41 @@
+---
+import type { ShopifyProduct } from '../../lib/shopify';
+import { formatPrice } from '../../lib/shopify';
+import AddToCart from './AddToCart.astro';
+
+interface Props {
+  product: ShopifyProduct;
+}
+const { product } = Astro.props;
+
+const image = product.images.edges[0]?.node;
+const variant = product.variants.edges[0]?.node;
+const price = formatPrice(product.priceRange.minVariantPrice.amount, product.priceRange.minVariantPrice.currencyCode);
+const url = `/products/${product.handle}`;
+---
+
+<article class="group flex h-full flex-col">
+  <a href={url} class="block aspect-square overflow-hidden rounded-lg bg-neutral-100">
+    {image ? (
+      <img
+        src={image.url}
+        alt={image.altText ?? product.title}
+        class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+        loading="lazy"
+      />
+    ) : (
+      <div class="flex h-full w-full items-center justify-center text-neutral-300">No image</div>
+    )}
+  </a>
+  <div class="flex flex-1 flex-col gap-1 pt-4">
+    <a href={url} class="font-medium text-neutral-900 hover:underline">{product.title}</a>
+    <p class="text-sm text-neutral-500">{price}</p>
+    <div class="mt-auto pt-3">
+      {variant ? (
+        <AddToCart variantId={variant.id} available={product.availableForSale} class="w-full" />
+      ) : (
+        <a href={url} class="block rounded-md border border-neutral-300 px-5 py-3 text-center text-sm">View product</a>
+      )}
+    </div>
+  </div>
+</article>

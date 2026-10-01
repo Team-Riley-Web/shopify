@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.0 — 2026-10-01
+
+New-store path for the Team Riley `starter`:
+
+- `npx team-riley-shopify` scaffolds a storefront into a copy of `starter`
+  without overwriting anything: thin `src/lib` wrappers, neutral
+  `components/shop/*` (product card, add-to-cart, cart drawer, search modal,
+  header controls, discount redirect), `/shop`, `/products/[handle]` and
+  `/discount` pages, `public/_redirects`, `.env.example`, and a Playwright
+  suite that runs against the mock catalog. Wires `src/alpine.ts` when it
+  still looks like the starter's; adds the `test:e2e` script.
+- `scripts/verify-scaffold.sh` exercises that path end to end.
+
+No changes to the runtime package.
+
 ## 1.0.0 — 2026-10-01
 
 First release. Extracted from the `starter-shopify`, `rosario` and `cfc`

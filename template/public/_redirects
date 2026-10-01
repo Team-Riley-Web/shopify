@@ -1,0 +1,10 @@
+# Discount links and QR codes. A code can be shared as /discount/CODE or as a
+# bare /CODE; both land on the redirect page, which stores the code and sends
+# the visitor on. Netlify only applies a 200 rewrite when no real page exists
+# at that path, so these never shadow real routes.
+/discount/*       /discount/index.html  200
+/:discount_code   /discount/index.html  200
+
+# A product published after the last build has no static page yet; send the
+# visitor to the shop instead of a 404 until the next deploy.
+/products/*       /shop                 302

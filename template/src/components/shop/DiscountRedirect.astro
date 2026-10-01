@@ -1,0 +1,28 @@
+---
+/* Landing page for discount links and QR codes: /discount?code=X, /discount/X
+   or /X (see public/_redirects). Stores the code for the cart store to apply,
+   then sends the visitor on, keeping tracking params. */
+interface Props {
+  code?: string;
+}
+const { code = '' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Redirecting…</title>
+    <!-- The redirect is a bundled module; keep a way out if it fails to load. -->
+    <noscript><meta http-equiv="refresh" content="0;url=/" /></noscript>
+  </head>
+  <body>
+    <div id="discount-redirect" data-code={code} hidden></div>
+    <script>
+      import { runDiscountRedirect } from '@team-riley/shopify';
+      runDiscountRedirect(window, document.getElementById('discount-redirect')?.dataset.code ?? '');
+    </script>
+  </body>
+</html>

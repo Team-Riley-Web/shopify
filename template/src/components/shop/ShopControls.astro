@@ -1,0 +1,19 @@
+---
+import { Search, ShoppingBag } from '@lucide/astro';
+/* Search and cart buttons for the site header. Drop into Header.astro. */
+---
+
+<div x-data class="flex items-center gap-1">
+  <button type="button" @click="$store.search.open()" class="rounded-md p-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Search">
+    <Search class="h-5 w-5" />
+  </button>
+  <button type="button" @click="$store.cart.open()" class="relative rounded-md p-2 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Cart">
+    <ShoppingBag class="h-5 w-5" />
+    <span
+      x-cloak
+      x-show="$store.cart.totalQuantity > 0"
+      x-text="$store.cart.totalQuantity"
+      class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-neutral-900 px-1 text-[10px] font-medium leading-none text-white"
+    ></span>
+  </button>
+</div>

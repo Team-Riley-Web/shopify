@@ -1,0 +1,25 @@
+---
+/* Adds one variant to the cart. Pass a literal `variantId`, or an Alpine
+   expression via `variantExpression` when the page lets the shopper pick. */
+interface Props {
+  variantId?: string;
+  variantExpression?: string;
+  available?: boolean;
+  class?: string;
+}
+const { variantId = '', variantExpression, available = true, class: className = '' } = Astro.props;
+const idExpr = variantExpression ?? JSON.stringify(variantId);
+---
+
+<button
+  type="button"
+  x-data="{ adding: false, added: false }"
+  @click={`if (adding || added) return; adding = true; await $store.cart.addItem(${idExpr}); adding = false; added = true; setTimeout(() => { added = false; }, 1600);`}
+  :disabled="adding || $store.cart.isLoading"
+  disabled={!available || undefined}
+  class={`inline-flex items-center justify-center rounded-md border border-neutral-900 bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-300 disabled:bg-neutral-300 ${className}`}
+>
+  <span x-show="!adding && !added">{available ? 'Add to Cart' : 'Sold Out'}</span>
+  <span x-show="adding" x-cloak>Adding…</span>
+  <span x-show="added" x-cloak>Added</span>
+</button>

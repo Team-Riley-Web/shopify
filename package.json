@@ -1,6 +1,6 @@
 {
   "name": "@team-riley/shopify",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Headless Shopify engine for Team Riley Astro storefronts: Storefront API client, catalog, cart, discount links, subscriptions.",
   "license": "MIT",
   "type": "module",
@@ -14,6 +14,7 @@
   },
   "files": [
     "dist",
+    "lib",
     "template",
     "bin"
   ],
