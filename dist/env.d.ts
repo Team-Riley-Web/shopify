@@ -1,6 +1,6 @@
 export type EnvRecord = Record<string, string | undefined>;
 /**
- * Merge Vite's `import.meta.env` with `process.env`, process winning, which is
+ * Merge Vite's env object with `process.env`, process winning, which is
  * what every site did by hand before. `process` is absent in the browser.
  */
 export declare function readEnv(importMetaEnv?: EnvRecord): EnvRecord;

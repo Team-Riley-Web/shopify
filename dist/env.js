@@ -1,9 +1,9 @@
 // Env helpers. The package never reads the environment itself: Vite only
-// replaces `import.meta.env.*` inside the site's own source, not inside
-// node_modules, so each site passes its `import.meta.env` in through readEnv()
-// and hands the resulting values to the factories.
+// inlines a site's own `import.meta` env values, never ones referenced from
+// node_modules, so each site passes its env object in through readEnv() and
+// hands the resulting values to the factories.
 /**
- * Merge Vite's `import.meta.env` with `process.env`, process winning, which is
+ * Merge Vite's env object with `process.env`, process winning, which is
  * what every site did by hand before. `process` is absent in the browser.
  */
 export function readEnv(importMetaEnv = {}) {
