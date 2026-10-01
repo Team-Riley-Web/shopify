@@ -49,6 +49,25 @@
 
 ---
 
+## Plan review outcomes (2026-10-01, independent reviewer)
+
+Accepted and folded into the tasks below (these override any conflicting step text):
+
+1. `readEnv` may read `process.env` (runtime, safe in the browser behind a guard); the no-env test forbids `import.meta.env` everywhere and `process.env` outside `src/env.ts`.
+2. `DiscountRedirect` becomes a bundled module script reading the optional code from `data-code`. This changes the discount page's HTML (expected diff, called out); the e2e discount tests are the proof for that page. Sanitising keeps `[A-Za-z0-9_-]` only.
+3. `createCartClient` gets `headlessFallbackDomain` (default `domain`). CFC passes `'cfcskincare.myshopify.com'` (its current constant); Rosario uses the default and its placeholder-asserting test is updated (bug fix, called out).
+4. **Real-data equivalence**: the Storefront token is public (`PUBLIC_SHOPIFY_STOREFRONT_TOKEN` ships in each live site's JS). Read it, plus the live API version, from the production bundle; build each site against the real catalog before and after migration back to back and `diff -r dist/` (normalised). This replaces mock-only proof as the main equivalence check; mock diff stays as a secondary check.
+5. `getProductsByHandles` and mock paths stay unfiltered (already implemented that way).
+6. Site wrappers copy their current env-read lines verbatim (`??` semantics, PUBLIC-first order in cart-client); the package normalises domains with `cleanDomain`.
+7. Freeze `CartStore` member names that CFC's wholesale tab duck-types (`applyCart`, `errorMessage`, `isOpen`, `items`, `id`) with a contract test.
+8. Store tests run inside real Alpine (`alpinejs` dev dep, jsdom) to prove reactivity through `this`.
+9. `fetch` resolved per call (already implemented).
+10. Leak check greps all of `dist/`, asserts `GetProducts` is absent from `dist/_astro` (catalog code not in browser), and a site test asserts `cart-client.ts`/`entrypoint.ts` never import `lib/shopify`.
+11. dist freshness: `test -z "$(git status --porcelain dist)"`; never add `prepare`/`prepack`.
+12. Install check runs with `GIT_SSH_COMMAND=false` (no SSH keys, like Netlify); the lockfile diff must add only the package.
+13. Check deploy-preview env scoping before relying on previews; compare sitemap path sets only.
+- Minor: e2e `.includes('/api/2024-01/…')` matchers also fixed; `exports` gets a `default` condition; template/`init` (Tasks 13–14) ship as v1.1.0 after the site PRs.
+
 ## File structure (package repo `~/Sites/shopify`)
 
 ```
