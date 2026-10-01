@@ -8,7 +8,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -23,7 +24,7 @@
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "check": "npm run typecheck && npm test && npm run build && git diff --exit-code -- dist"
+    "check": "npm run typecheck && npm test && npm run build && test -z \"$(git status --porcelain dist)\""
   },
   "devDependencies": {
     "@types/alpinejs": "^3.17.0",
@@ -37,5 +38,9 @@
   },
   "dependencies": {
     "@types/node": "^22.20.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Team-Riley-Web/shopify.git"
   }
 }

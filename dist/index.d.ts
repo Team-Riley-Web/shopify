@@ -1,41 +1,12 @@
 export { readEnv, envValue, envList, envFlag, type EnvRecord } from './env.js';
-export {
-  createStorefrontFetch,
-  storefrontUrl,
-  DEFAULT_API_VERSION,
-  PLACEHOLDER_DOMAIN,
-  type StorefrontConfig,
-  type StorefrontFetch,
-} from './fetch.js';
+export { createStorefrontFetch, storefrontUrl, DEFAULT_API_VERSION, PLACEHOLDER_DOMAIN, type StorefrontConfig, type StorefrontFetch, } from './fetch.js';
 export type * from './types.js';
-export {
-  productListingFields,
-  productsQuery,
-  collectionProductsQuery,
-  productByHandleListingQuery,
-  productDetailQuery,
-} from './queries.js';
+export { productListingFields, productsQuery, collectionProductsQuery, productByHandleListingQuery, productDetailQuery, } from './queries.js';
 export { createCatalog, formatPrice, DEFAULT_FEATURED_COLLECTION, type Catalog, type CatalogConfig, type ErrorPolicy } from './catalog.js';
 export { hasTag, isWholesaleProduct, excludeWholesale } from './filters.js';
 export { formatSellingPlanInterval, planIntervalMonths, filterSellingPlanGroups } from './selling-plans.js';
-export {
-  createCartClient,
-  cleanDomain,
-  type CartClient,
-  type CartClientConfig,
-  type Cart,
-  type CartLineItem,
-  type CartLineInput,
-  type SearchProduct,
-} from './cart.js';
-export {
-  createCartStore,
-  CART_STORAGE_KEY,
-  DISCOUNT_STORAGE_KEY,
-  type CartApi,
-  type CartStore,
-  type CartStoreOptions,
-} from './cart-store.js';
+export { createCartClient, cleanDomain, type CartClient, type CartClientConfig, type Cart, type CartLineItem, type CartLineInput, type SearchProduct, } from './cart.js';
+export { createCartStore, CART_STORAGE_KEY, DISCOUNT_STORAGE_KEY, type CartApi, type CartStore, type CartStoreOptions, } from './cart-store.js';
 export { createSearchStore, type SearchStore, type SearchStoreOptions } from './search-store.js';
 export { sanitizeDiscountCode, discountCodeFromUrl, discountRedirectUrl, runDiscountRedirect } from './discount.js';
 export { demoProducts } from './mocks.js';
