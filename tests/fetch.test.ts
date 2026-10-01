@@ -45,7 +45,7 @@ describe('createStorefrontFetch', () => {
   it('uses the configured API version', async () => {
     const { fetch, fetchImpl } = setup([ok({})], { apiVersion: '2025-04' });
     await fetch('{}');
-    expect(fetchImpl.mock.calls[0]?.[0]).toBe('https://shop.myshopify.com/api/2025-04/graphql.json');
+    expect((fetchImpl.mock.calls[0] as unknown as [string])[0]).toBe('https://shop.myshopify.com/api/2025-04/graphql.json');
   });
 
   it('retries transient statuses with exponential backoff', async () => {

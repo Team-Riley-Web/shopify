@@ -1,0 +1,105 @@
+import type { ShopifyProduct } from './types.js';
+
+// Generic demo catalog served when `useMocks` is on and the site passes no
+// `mockProducts` of its own. Images point at /favicon.svg, which every
+// starter ships, so mock builds never reach for a remote asset.
+export const demoProducts: ShopifyProduct[] = [
+  {
+    id: 'gid://shopify/Product/1001',
+    title: 'Starter Ceramic Mug',
+    handle: 'ceramic-mug',
+    description: 'A test-safe product fixture for local and CI shopping flow tests.',
+    availableForSale: true,
+    tags: ['Featured'],
+    priceRange: { minVariantPrice: { amount: '28.00', currencyCode: 'USD' } },
+    images: { edges: [{ node: { url: '/favicon.svg', altText: 'Starter Ceramic Mug' } }] },
+    variants: {
+      edges: [{ node: { id: 'gid://shopify/ProductVariant/2001', title: 'Default Title', price: { amount: '28.00' } } }],
+    },
+    collections: { edges: [{ node: { title: 'Starter Collection', handle: 'starter-collection' } }] },
+  },
+  {
+    id: 'gid://shopify/Product/1002',
+    title: 'Starter Cotton Tote',
+    handle: 'cotton-tote',
+    description: 'A test-safe tote fixture with a named variant.',
+    availableForSale: true,
+    tags: ['Accessories'],
+    priceRange: { minVariantPrice: { amount: '46.00', currencyCode: 'USD' } },
+    images: { edges: [{ node: { url: '/favicon.svg', altText: 'Starter Cotton Tote' } }] },
+    variants: {
+      edges: [{ node: { id: 'gid://shopify/ProductVariant/2002', title: '1 oz', price: { amount: '46.00' } } }],
+    },
+    collections: { edges: [{ node: { title: 'Starter Collection', handle: 'starter-collection' } }] },
+  },
+  {
+    id: 'gid://shopify/Product/1003',
+    title: 'Starter Sold Out Cap',
+    handle: 'sold-out-cap',
+    description: 'A test-safe unavailable fixture.',
+    availableForSale: false,
+    tags: ['Seasonal'],
+    priceRange: { minVariantPrice: { amount: '34.00', currencyCode: 'USD' } },
+    images: { edges: [{ node: { url: '/favicon.svg', altText: 'Starter Sold Out Cap' } }] },
+    variants: {
+      edges: [{ node: { id: 'gid://shopify/ProductVariant/2003', title: 'Default Title', price: { amount: '34.00' } } }],
+    },
+    collections: { edges: [{ node: { title: 'Starter Collection', handle: 'starter-collection' } }] },
+  },
+  {
+    id: 'gid://shopify/Product/1004',
+    title: 'Starter Desk Notebook',
+    handle: 'desk-notebook',
+    description: 'A durable notebook for daily planning.',
+    availableForSale: true,
+    tags: ['Accessories'],
+    priceRange: { minVariantPrice: { amount: '52.00', currencyCode: 'USD' } },
+    images: { edges: [{ node: { url: '/favicon.svg', altText: 'Starter Desk Notebook' } }] },
+    variants: {
+      edges: [{ node: { id: 'gid://shopify/ProductVariant/2004', title: 'Default Title', price: { amount: '52.00' } } }],
+    },
+    collections: { edges: [{ node: { title: 'Starter Collection', handle: 'starter-collection' } }] },
+  },
+  {
+    id: 'gid://shopify/Product/1005',
+    title: 'Starter Gift Card',
+    handle: 'gift-card',
+    description: 'A flexible gift card for the demo catalog.',
+    availableForSale: true,
+    tags: ['Accessories'],
+    priceRange: { minVariantPrice: { amount: '62.00', currencyCode: 'USD' } },
+    images: { edges: [{ node: { url: '/favicon.svg', altText: 'Starter Gift Card' } }] },
+    variants: {
+      edges: [{ node: { id: 'gid://shopify/ProductVariant/2005', title: 'Default Title', price: { amount: '62.00' } } }],
+    },
+    collections: { edges: [{ node: { title: 'Starter Collection', handle: 'starter-collection' } }] },
+  },
+  {
+    id: 'gid://shopify/Product/1006',
+    title: 'Starter Water Bottle',
+    handle: 'water-bottle',
+    description: 'A reusable bottle for the demo catalog.',
+    availableForSale: true,
+    tags: ['Accessories'],
+    priceRange: { minVariantPrice: { amount: '58.00', currencyCode: 'USD' } },
+    images: { edges: [{ node: { url: '/favicon.svg', altText: 'Starter Water Bottle' } }] },
+    variants: {
+      edges: [{ node: { id: 'gid://shopify/ProductVariant/2006', title: 'Default Title', price: { amount: '58.00' } } }],
+    },
+    collections: { edges: [{ node: { title: 'Starter Collection', handle: 'starter-collection' } }] },
+  },
+  {
+    id: 'gid://shopify/Product/1007',
+    title: 'Starter Canvas Pouch',
+    handle: 'canvas-pouch',
+    description: 'A canvas pouch for the demo catalog.',
+    availableForSale: true,
+    tags: ['Featured'],
+    priceRange: { minVariantPrice: { amount: '38.00', currencyCode: 'USD' } },
+    images: { edges: [{ node: { url: '/favicon.svg', altText: 'Starter Canvas Pouch' } }] },
+    variants: {
+      edges: [{ node: { id: 'gid://shopify/ProductVariant/2007', title: 'Default Title', price: { amount: '38.00' } } }],
+    },
+    collections: { edges: [{ node: { title: 'Starter Collection', handle: 'starter-collection' } }] },
+  },
+];
