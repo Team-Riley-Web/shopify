@@ -12,18 +12,19 @@ the factories here, and adds anything specific to that store.
 ## Install
 
 ```sh
-npm i git+https://github.com/Team-Riley-Web/shopify.git#v1.1.1
+npm i github:Team-Riley-Web/shopify#v1.1.1
 ```
 
-Pin to a tag, and use the `git+https://` form so the lockfile records an HTTPS
-URL (the `github:` shorthand records `git+ssh`, which only works on Netlify
-because npm happens to try the HTTPS tarball first). Plain `npm ci`, no auth.
+Pin to a tag. The lockfile records a `git+ssh` URL (npm canonicalises every
+GitHub form to that), but `npm ci` fetches the pinned commit's tarball over
+HTTPS first, so Netlify installs it with no SSH key and no auth. Verified with
+`GIT_SSH_COMMAND=false npm ci`.
 
 ## New store from the starter
 
 ```sh
 # in a fresh copy of Team-Riley-Web/starter
-npm i git+https://github.com/Team-Riley-Web/shopify.git#v1.1.1
+npm i github:Team-Riley-Web/shopify#v1.1.1
 npx team-riley-shopify
 npm install && npx playwright install chromium && npm run test:e2e
 ```
@@ -97,7 +98,7 @@ Rule of thumb: the package never reads env vars. Vite only inlines
 ## Upgrade a site
 
 ```sh
-npm i git+https://github.com/Team-Riley-Web/shopify.git#v1.1.1
+npm i github:Team-Riley-Web/shopify#v1.1.1
 npm run test:unit && npm run test:e2e
 ```
 

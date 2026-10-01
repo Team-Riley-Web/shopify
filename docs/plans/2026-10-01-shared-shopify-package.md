@@ -19,8 +19,8 @@
 | 11 Rosario migration | PR open | [rosario#3](https://github.com/Team-Riley-Web/rosario/pull/3): unit 48/48, e2e 7/7, real-catalog build identical except `discount/index.html` |
 | 12 CFC baseline + migration | PR open | [cfc#3](https://github.com/TheRileyBird/cfc/pull/3): unit 88/88, e2e 17/17 (was 15/17), real-catalog build identical (0 changed), leak check clean |
 | 13 template + init | done | `template/` (17 files), `lib/init.mjs` + `bin`, 4 init tests |
-| 14 scaffold verification + v1.1.0 + starter README | see git log | `scripts/verify-scaffold.sh`, starter branch `shopify-docs` |
-| 15 final review | pending | |
+| 14 scaffold verification + v1.1.0 + starter README | done | `scripts/verify-scaffold.sh v1.1.1` passes installing from the GitHub tag; [starter#1](https://github.com/Team-Riley-Web/starter/pull/1) |
+| 15 final review | done | Independent reviewer: both site PRs safe to merge; template fixes + hardening shipped as v1.1.1 (see CHANGELOG) |
 
 Discoveries during execution (beyond the plan review):
 - Parallel shell calls share one working directory: an `npm install -D alpinejs` meant for the package landed in `cfc` and was reverted with `git checkout` + `npm ci`. Everything after that used subshells and absolute paths.

@@ -16,7 +16,7 @@ Fixes from the post-migration review:
   cursor; a 200 with a non-JSON body throws a labelled error.
 - `@types/node` moved to devDependencies (the package has no runtime deps).
 - `verify-scaffold.sh` leak and `astro check` failures are fatal.
-- Docs recommend the `git+https://` dependency form.
+- Docs explain how the git dependency installs on Netlify without SSH.
 
 ## 1.1.0 — 2026-10-01
 
