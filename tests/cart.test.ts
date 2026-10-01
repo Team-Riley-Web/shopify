@@ -175,6 +175,15 @@ describe('normalizeCheckoutUrl', () => {
       .toBe('https://shop.myshopify.com/checkouts/cn/tok?key=abc');
   });
 
+  it('uses headlessFallbackDomain when one is given', () => {
+    const { client } = clientWith(() => ({}), {
+      checkoutDomain: 'www.example.com',
+      headlessDomains: ['www.example.com'],
+      headlessFallbackDomain: 'real-store.myshopify.com',
+    });
+    expect(client.normalizeCheckoutUrl('https://www.example.com/checkouts/cn/t')).toBe('https://real-store.myshopify.com/checkouts/cn/t');
+  });
+
   it('defaults the checkout domain to the store domain', () => {
     const { client } = clientWith(() => ({}));
     expect(client.normalizeCheckoutUrl('https://www.example.com/checkouts/cn/t')).toBe('https://shop.myshopify.com/checkouts/cn/t');
