@@ -1,0 +1,210 @@
+import type { Cart, CartClient } from './cart.js';
+
+export const CART_STORAGE_KEY = 'shopify_cart_id';
+export const DISCOUNT_STORAGE_KEY = 'shopify_discount_code';
+
+export type CartApi = Pick<
+  CartClient,
+  'createCart' | 'getCart' | 'addToCart' | 'addLinesToCart' | 'removeFromCart' | 'updateCartItem' | 'updateCartDiscountCodes'
+>;
+
+export interface CartStoreOptions {
+  /** ISO currency for formatPrice(). Default USD. */
+  currency?: string;
+}
+
+function appendDiscountToCheckoutUrl(checkoutUrl: string, discountCode: string) {
+  if (!checkoutUrl || !discountCode) return checkoutUrl;
+
+  try {
+    const url = new URL(checkoutUrl);
+    url.searchParams.set('discount', discountCode);
+    return url.href;
+  } catch {
+    return checkoutUrl;
+  }
+}
+
+/**
+ * The Alpine `$store.cart` object. Register it with
+ * `Alpine.store('cart', createCartStore(cartClient))`; Alpine calls `init()`
+ * itself on registration, which is what loads or creates the cart on page open.
+ *
+ * Methods mutate through `this` so Alpine's reactive proxy sees every change.
+ * Member names are part of the public contract: templates bind to them and
+ * CFC's wholesale tab drives the store from outside (`applyCart`,
+ * `errorMessage`, `isOpen`, `isLoading`, `checkoutUrl`).
+ */
+export function createCartStore(api: CartApi, options: CartStoreOptions = {}) {
+  const currency = options.currency ?? 'USD';
+  const fmt = (amount: string) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(amount) || 0);
+
+  return {
+    isOpen: false,
+    isLoading: false,
+    id: null as string | null,
+    items: [] as Cart['items'],
+    totalQuantity: 0,
+    totalAmount: '0.00',
+    checkoutUrl: '',
+    errorMessage: '',
+
+    getPendingDiscountCode() {
+      return localStorage.getItem(DISCOUNT_STORAGE_KEY)?.trim() || '';
+    },
+
+    clearPendingDiscountCode() {
+      localStorage.removeItem(DISCOUNT_STORAGE_KEY);
+    },
+
+    async applyPendingDiscountCode() {
+      const discountCode = this.getPendingDiscountCode();
+      if (!this.id || !discountCode) return;
+      if (this.totalQuantity < 1) return;
+
+      try {
+        const cart = await api.updateCartDiscountCodes(this.id, [discountCode]);
+        const accepted = cart.discountCodes.some(
+          (code) => code.code.toLowerCase() === discountCode.toLowerCase() && code.applicable
+        );
+
+        // A rejected code is deliberately kept: "not applicable to this cart"
+        // usually means the qualifying product is not in it yet, and the code
+        // should still work once it is.
+        if (!accepted) throw new Error('Discount code is not applicable to this cart.');
+
+        cart.checkoutUrl = appendDiscountToCheckoutUrl(cart.checkoutUrl, discountCode);
+        this.applyCart(cart);
+
+        // The cart carries the discount server-side from here on, so the pending
+        // copy has done its job. Keeping it was what made a one-off referral code
+        // reattach to every later cart on this browser, subscriptions included.
+        this.clearPendingDiscountCode();
+      } catch {
+        // Transient API failure or rejected code: keep the code so the next cart
+        // action retries, and let checkout validate it via the URL meanwhile.
+        this.checkoutUrl = appendDiscountToCheckoutUrl(this.checkoutUrl, discountCode);
+      }
+    },
+
+    applyCart(cart: Cart) {
+      this.id = cart.id;
+      this.items = cart.items;
+      this.totalQuantity = cart.totalQuantity;
+      this.totalAmount = cart.totalAmount;
+      this.checkoutUrl = cart.checkoutUrl;
+    },
+
+    async init() {
+      this.errorMessage = '';
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        try {
+          const cart = await api.getCart(saved);
+          if (cart) {
+            this.applyCart(cart);
+            await this.applyPendingDiscountCode();
+            return;
+          }
+        } catch {
+          localStorage.removeItem(CART_STORAGE_KEY);
+        }
+      }
+      try {
+        const cart = await api.createCart();
+        this.applyCart(cart);
+        localStorage.setItem(CART_STORAGE_KEY, cart.id);
+        await this.applyPendingDiscountCode();
+      } catch {
+        this.errorMessage = 'Cart is temporarily unavailable. Please try again.';
+      }
+    },
+
+    async addItem(variantId: string, quantity = 1, sellingPlanId?: string) {
+      this.errorMessage = '';
+      if (!variantId || quantity < 1) {
+        this.errorMessage = 'This product is not available right now.';
+        return;
+      }
+      if (!this.id) await this.init();
+      if (!this.id) return;
+      this.isLoading = true;
+      try {
+        const cart = sellingPlanId
+          ? await api.addToCart(this.id, variantId, quantity, sellingPlanId)
+          : await api.addToCart(this.id, variantId, quantity);
+        this.applyCart(cart);
+        await this.applyPendingDiscountCode();
+        this.isOpen = true;
+      } catch {
+        this.errorMessage = 'We could not add that item to your cart. Please try again.';
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async addItems(
+      lines: Array<{ merchandiseId: string; quantity?: number; sellingPlanId?: string }>,
+      options: { openCart?: boolean } = {}
+    ) {
+      this.errorMessage = '';
+      const validLines = lines.filter((line) => line.merchandiseId && (line.quantity ?? 1) > 0);
+      if (validLines.length === 0) {
+        this.errorMessage = 'These products are not available right now.';
+        return;
+      }
+      if (!this.id) await this.init();
+      if (!this.id) return;
+      this.isLoading = true;
+      try {
+        const cart = await api.addLinesToCart(this.id, validLines);
+        this.applyCart(cart);
+        await this.applyPendingDiscountCode();
+        this.isOpen = options.openCart ?? true;
+      } catch {
+        this.errorMessage = 'We could not add those items to your cart. Please try again.';
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async removeItem(lineId: string) {
+      this.errorMessage = '';
+      if (!this.id) return;
+      this.isLoading = true;
+      try {
+        const cart = await api.removeFromCart(this.id, lineId);
+        this.applyCart(cart);
+      } catch {
+        this.errorMessage = 'We could not remove that item. Please try again.';
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async updateItem(lineId: string, quantity: number) {
+      this.errorMessage = '';
+      if (quantity < 1) {
+        await this.removeItem(lineId);
+        return;
+      }
+      if (!this.id) return;
+      this.isLoading = true;
+      try {
+        const cart = await api.updateCartItem(this.id, lineId, quantity);
+        this.applyCart(cart);
+      } catch {
+        this.errorMessage = 'We could not update your cart. Please try again.';
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    open() { this.isOpen = true; },
+    close() { this.isOpen = false; },
+    formatPrice: fmt,
+  };
+}
+
+export type CartStore = ReturnType<typeof createCartStore>;
