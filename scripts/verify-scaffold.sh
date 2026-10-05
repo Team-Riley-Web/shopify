@@ -9,7 +9,7 @@ SPEC="${1:?usage: verify-scaffold.sh <tag|tarball>}"
 STARTER="${STARTER:-$HOME/Sites/starter}"
 case "$SPEC" in
   *.tgz) SPEC="$(cd "$(dirname "$SPEC")" && pwd)/$(basename "$SPEC")" ;;
-  v*)    SPEC="github:Team-Riley-Web/shopify#$SPEC" ;;
+  v*)    SPEC="github:Team-Riley-Web/team-riley-shopify#$SPEC" ;;
 esac
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/scaffold-XXXXXX")"
 trap '[ "${KEEP:-0}" = 1 ] && echo "kept $WORK" || rm -rf "$WORK"' EXIT

@@ -14,12 +14,12 @@
 
 | Task | State | Evidence |
 |---|---|---|
-| 1–9 package v1.0.0 | done | 140 tests, `npm run check` green, CI green on `main` and `v1.0.0`; public repo `Team-Riley-Web/shopify` |
+| 1–9 package v1.0.0 | done | 140 tests, `npm run check` green, CI green on `main` and `v1.0.0`; public repo `Team-Riley-Web/team-riley-shopify` |
 | 10 Rosario baseline | done | e2e 4/7 → 7/7 on `master` (version-agnostic mocks), separate commit |
 | 11 Rosario migration | PR open | [rosario#3](https://github.com/Team-Riley-Web/rosario/pull/3): unit 48/48, e2e 7/7, real-catalog build identical except `discount/index.html` |
 | 12 CFC baseline + migration | PR open | [cfc#3](https://github.com/TheRileyBird/cfc/pull/3): unit 88/88, e2e 17/17 (was 15/17), real-catalog build identical (0 changed), leak check clean |
 | 13 template + init | done | `template/` (17 files), `lib/init.mjs` + `bin`, 4 init tests |
-| 14 scaffold verification + v1.1.0 + starter README | done | `scripts/verify-scaffold.sh v1.1.1` passes installing from the GitHub tag; [starter#1](https://github.com/Team-Riley-Web/starter/pull/1) |
+| 14 scaffold verification + v1.1.0 + starter README | done | `scripts/verify-scaffold.sh v1.1.1` passes installing from the GitHub tag; [starter#1](https://github.com/Team-Riley-Web/team-riley-starter/pull/1) |
 | 15 final review | done | Independent reviewer: both site PRs safe to merge; template fixes + hardening shipped as v1.1.1 (see CHANGELOG) |
 
 Discoveries during execution (beyond the plan review):
@@ -43,7 +43,7 @@ Discoveries during execution (beyond the plan review):
 
 ## Decisions (confirmed with user)
 
-- Package repo: **new public** `github.com/Team-Riley-Web/shopify`, installed as `"@team-riley/shopify": "github:Team-Riley-Web/shopify#vX.Y.Z"`. Public means zero Netlify auth setup; it holds no secrets or store data.
+- Package repo: **new public** `github.com/Team-Riley-Web/team-riley-shopify`, installed as `"@team-riley/shopify": "github:Team-Riley-Web/team-riley-shopify#vX.Y.Z"`. Public means zero Netlify auth setup; it holds no secrets or store data.
 - Live sites: **branch + PR**; the user merges. Nothing is pushed to `master`.
 - `starter-shopify`: left untouched; user archives it after the migration is verified.
 
@@ -64,7 +64,7 @@ Discoveries during execution (beyond the plan review):
 2. **Missing/placeholder env on a real deploy.** Rosario must still fail the Netlify build loudly when Shopify errors; CFC must keep its current (warn-and-continue) behaviour. Test: package unit tests for `onError: 'throw' | 'warn'` + Rosario wrapper test asserting strict mode when `NETLIFY=true` (Tasks 3, 10).
 3. **Git dependency install on Netlify.** `npm ci` must install the package from the lockfile with no build step and no auth. Test: `npm ci` from a clean clone of each site + Netlify deploy preview green (Tasks 11, 13).
 4. **Real catalog differs from the mocks.** Mock-build equality does not prove live data renders the same. Test: compare the deploy preview's `sitemap-0.xml` URL set and three product pages against production (Tasks 11, 13).
-5. **Upgrading a site later.** A future `npm i github:Team-Riley-Web/shopify#v1.1.0` must be the whole upgrade. Test: the scaffold verification installs the package by tag from GitHub, not by local path (Task 15).
+5. **Upgrading a site later.** A future `npm i github:Team-Riley-Web/team-riley-shopify#v1.1.0` must be the whole upgrade. Test: the scaffold verification installs the package by tag from GitHub, not by local path (Task 15).
 
 ---
 
@@ -335,8 +335,8 @@ Logic is a verbatim port of the inline script in `DiscountRedirect.astro`.
 - [ ] Step 1: Add `tests/no-env.test.ts`: reads every file in `src/` and asserts none contains `import.meta.env` or `process.env` (Global Constraint, Review Focus 1).
 - [ ] Step 2: `npm run check` green.
 - [ ] Step 3: CI workflow: Node 22, `npm ci`, `npm run check`.
-- [ ] Step 4: README: what the package is, install line, wrapper example, upgrade procedure (`npm i github:Team-Riley-Web/shopify#vX.Y.Z` then run site tests), release procedure (bump version + CHANGELOG, `npm run check`, commit, `git tag vX.Y.Z`, push tags).
-- [ ] Step 5: `gh repo create Team-Riley-Web/shopify --public --source . --push`; tag and push `v1.0.0`; CI green.
+- [ ] Step 4: README: what the package is, install line, wrapper example, upgrade procedure (`npm i github:Team-Riley-Web/team-riley-shopify#vX.Y.Z` then run site tests), release procedure (bump version + CHANGELOG, `npm run check`, commit, `git tag vX.Y.Z`, push tags).
+- [ ] Step 5: `gh repo create Team-Riley-Web/team-riley-shopify --public --source . --push`; tag and push `v1.0.0`; CI green.
 
 ### Task 10: Rosario — repair baseline
 
@@ -350,7 +350,7 @@ Logic is a verbatim port of the inline script in `DiscountRedirect.astro`.
 
 **Files:** Modify `package.json`, `src/lib/shopify.ts`, `src/lib/cart-client.ts`, `src/lib/cart-store.ts`, `src/entrypoint.ts`, `src/components/DiscountRedirect.astro`; tests import paths unchanged.
 
-- [ ] Step 1: `npm i github:Team-Riley-Web/shopify#v1.0.0`.
+- [ ] Step 1: `npm i github:Team-Riley-Web/team-riley-shopify#v1.0.0`.
 - [ ] Step 2: `src/lib/shopify.ts` becomes:
 ```ts
 import { readEnv, envValue, envFlag, createCatalog, excludeWholesale, PLACEHOLDER_DOMAIN, type ShopifyProduct } from '@team-riley/shopify';
@@ -409,7 +409,7 @@ Template components are **neutral** (Tailwind 4 utilities, grayscale, no brand t
 
 **Files:** `scripts/verify-scaffold.sh`; `starter/README.md` (one section).
 
-- [ ] Step 1: `verify-scaffold.sh`: copy `~/Sites/starter` (git archive of HEAD, so uncommitted local edits are excluded) to a temp dir, `npm i github:Team-Riley-Web/shopify#<tag>`, `npx team-riley-shopify init`, apply the two manual edits with `sed`, `npm i`, `npx playwright install chromium`, run the mock build and `test:e2e`. Expected: build succeeds, e2e passes (add to cart, drawer, checkout handoff, discount link).
+- [ ] Step 1: `verify-scaffold.sh`: copy `~/Sites/starter` (git archive of HEAD, so uncommitted local edits are excluded) to a temp dir, `npm i github:Team-Riley-Web/team-riley-shopify#<tag>`, `npx team-riley-shopify init`, apply the two manual edits with `sed`, `npm i`, `npx playwright install chromium`, run the mock build and `test:e2e`. Expected: build succeeds, e2e passes (add to cart, drawer, checkout handoff, discount link).
 - [ ] Step 2: Tag `v1.1.0`, push, run `verify-scaffold.sh v1.1.0` (installs from GitHub — Review Focus 5).
 - [ ] Step 3: On a `shopify-docs` branch in `starter`, add a "Make it a Shopify store" README section (three commands). Commit only `README.md` (starter has unrelated uncommitted edits to `TASKS.md` and `BaseLayout.astro` that must not be swept in). Push branch + PR.
 - [ ] Step 4: Bump Rosario/CFC PRs to `#v1.1.0` only if v1.1.0 changed `src/` (it shouldn't — template only).
