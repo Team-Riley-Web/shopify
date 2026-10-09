@@ -30,7 +30,7 @@
   "devDependencies": {
     "@types/alpinejs": "^3.17.0",
     "alpinejs": "^3.17.4",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.1.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11",
     "@types/node": "^22.20.5"
